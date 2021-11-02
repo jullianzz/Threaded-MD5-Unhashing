@@ -75,14 +75,16 @@ public class Dispatcher {
     }
 
     public static void main(String[] args) {
-        // Path of input file
-        String path = args[0]; 
-        // Number of CPUs on the machine, N
-        int N = Integer.parseInt(args[1]); 
-        // Recommended length of timeout
-        long timeout = Long.parseLong(args[2]);
-        // Call dispatch method
-        Dispatcher.dispatch(path, N, timeout); 
+        String path = args[0];      // Path of input file
+        int N = Integer.parseInt(args[1]); // Number of CPUs on the machine, N
+
+        try {
+            long timeout = Long.parseLong(args[2]);
+            Dispatcher.dispatch(path, N, timeout); 
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Dispatcher.dispatch(path, N, -1); 
+        }
+
     }
     
 }

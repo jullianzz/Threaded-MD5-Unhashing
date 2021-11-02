@@ -24,6 +24,7 @@ public class CpuThread implements Runnable {
         shutdown = false; 
     }
 
+
     @Override
     public void run() {
 
@@ -36,7 +37,9 @@ public class CpuThread implements Runnable {
                     }
                     workAvailable = false; 
                 }); 
-                Object result = future.get(timeout, TimeUnit.MILLISECONDS); 
+                if (timeout != -1) {
+                    Object result = future.get(timeout, TimeUnit.MILLISECONDS); 
+                }
 
             } catch (TimeoutException e) {  // Thrown if unhashing takes too long (a.k.a thr.run() times out)
                 System.out.println(s);
