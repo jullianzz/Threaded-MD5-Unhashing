@@ -1,35 +1,61 @@
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.lang.Runnable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class CpuThread implements Runnable {
-    private Thread thr;
-    LinkedList<String> wq; 
+    Thread thr;
+    long timeout; 
+    String s; 
+    boolean workAvailable;
+    ExecutorService executor;
+    Future<?> future;
+    volatile boolean shutdown; 
 
-    public CpuThread(LinkedList<String> wq, int i) {
+    public CpuThread(int i, long timeout) {
         thr = new Thread(this, String.valueOf(i)); 
-        this.wq = wq; 
+        this.timeout = timeout; 
+        executor = Executors.newSingleThreadExecutor();
+        workAvailable = false; 
+        shutdown = false; 
     }
 
     @Override
     public void run() {
-        // System.out.println("Running " + thr.getName()); 
-        while (wq.size() != 0) {
-            // Invoke UnHash.unhash method
+
+        while (!shutdown) {
             try {
-                System.out.println(UnHash.unhash(wq.remove())); 
+
+                future = executor.submit(()->{
+                    if (workAvailable) {
+                        System.out.println(UnHash.unhash(s));
+                    }
+                    workAvailable = false; 
+                }); 
+                Object result = future.get(timeout, TimeUnit.MILLISECONDS); 
+
+            } catch (TimeoutException e) {  // Thrown if unhashing takes too long (a.k.a thr.run() times out)
+                System.out.println(s);
+                future.cancel(true); 
             } catch (NoSuchElementException e) {
-                // It is possible that while running the thread, the 
-                // while loop is entered (i.e. size != 0), but 
-                // during between that condition check and the unhash method
-                // another thread handles the last wq element and size becomes 0
-            }
+                future.cancel(true); 
+            } catch (InterruptedException e) {
+                future.cancel(true); 
+            } catch (ExecutionException e) {
+                future.cancel(true); 
+            }  
         }
 
+        // System.out.println("Terminate thread**");
+        future.cancel(true);
+        executor.shutdownNow();
     }
 
     void start() {
-        // System.out.println("Starting " + thr.getName());
         thr.start();
     }
     
