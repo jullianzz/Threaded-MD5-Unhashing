@@ -1,9 +1,14 @@
 
 public class UnHash {
 
-    static int unhash (String to_unhash) {
+    boolean stop_task = false; 
+
+    int unhash (String to_unhash) {
         int i = 0; 
         while (true) {
+            if (stop_task) {
+                return -1; 
+            }
             if (to_unhash.equals(Hash.hash(i))) {
                 return i; 
             } 
@@ -12,6 +17,7 @@ public class UnHash {
     }
     public static void main(String[] args) {
         String to_unhash = args[0]; 
-        System.out.println(UnHash.unhash(to_unhash)); 
+        UnHash uh = new UnHash(); 
+        System.out.println(uh.unhash(to_unhash));
     }
 }
