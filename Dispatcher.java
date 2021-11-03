@@ -37,16 +37,15 @@ public class Dispatcher {
             threads.get(i).start(); 
         }
 
-        // Use a while loop to pass strings to threads
+        // Distribute work to threads until there is no work left
         while (wq.size() != 0) {
-            // Find idle processor by looping through all processors and checking workAvailable
+            // Find idle processor by looping through all processors and checking busy
             for (int i = 0; i < N; i++) {
-                if (!threads.get(i).workAvailable) {
+                if (!threads.get(i).busy) {
                     try {
-                        // Set s to new line
-                        threads.get(i).s = wq.remove(); 
-                        // Set work Available to true
-                        threads.get(i).workAvailable = true; 
+                        // Add work to thread buffer
+                        threads.get(i).addToBuffer(wq.remove()); 
+                        // System.out.println("kill me1");
                     } catch (NoSuchElementException e) {
                         // NoSuchElementException
                     }
@@ -54,13 +53,12 @@ public class Dispatcher {
             }
         }
 
-        // This while loop acts as another thread
-        // in the main execution. Shutdown all threads once wq is empty
+        // Shutdown all threads once wq is empty
         while (true) {
             boolean allDown = true; 
             if (wq.size() == 0) {
                 for (int i = 0; i < N; i++) {
-                    if (!threads.get(i).workAvailable) {
+                    if (!threads.get(i).busy && threads.get(i).buffer.size() == 0) {
                         threads.get(i).shutdown = true; 
                     } else {
                         allDown = false;
