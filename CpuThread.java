@@ -1,5 +1,6 @@
 import java.util.NoSuchElementException;
 import java.lang.Runnable;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,16 +15,20 @@ public class CpuThread implements Runnable {
     long timeout; 
     boolean busy;
     ExecutorService executor;
-    Future<?> future;
+    Future<Integer> future;
     volatile boolean shutdown; 
     LinkedList<String> buffer = new LinkedList<String>();
+    LinkedList<Integer> CH = new LinkedList<Integer>();     // CH : cracked hashes
+    LinkedList<String> IUH = new LinkedList<String>();      // IUH : initially uncrackable hashes
+    HashCallable callable; 
 
-    public CpuThread(int i, long timeout) {
+    public CpuThread(int i, long timeout, HashCallable cb) {
         thr = new Thread(this, String.valueOf(i)); 
         this.timeout = timeout; 
         executor = Executors.newSingleThreadExecutor();
         busy = false; 
         shutdown = false; 
+        callable = cb; 
     }
 
 
@@ -31,29 +36,24 @@ public class CpuThread implements Runnable {
     public void run() {
 
         while (!shutdown) {
-            // System.out.println("kill me2");
             try {
                 if (buffer.size() != 0) {
-                    UnHash uh = new UnHash(); 
-                    // System.out.println("kill me3");
                     String s = buffer.remove(); 
+                    callable.s = s; 
                     busy = true; 
                     try {
-                        future = executor.submit(()->{
-                            int val = uh.unhash(s); 
-                            if (val != -1) {
-                                // System.out.println("Thread " + thr.getName() + " hash of " + s + " returns " + val);
-                                System.out.println(val);
-                            }
-                        });
-                        if (timeout != -1) {
-                            future.get(timeout, TimeUnit.MILLISECONDS); 
-                        }
+                        future = executor.submit(callable);
+                        int result; 
+                        if (timeout != -1)
+                            result = future.get(timeout, TimeUnit.MILLISECONDS); 
+                        else
+                            result = future.get(); 
+                        if (result != -1) 
+                            CH.add(result);
                     } catch (TimeoutException e) {
-                        uh.stop_task = true; 
-                        future.cancel(true); 
-                        // System.out.println("Thread " + thr.getName() + " timed out on " + s);
-                        System.out.println(s);
+                        callable.uh.stop_task = true; 
+                        future.cancel(true);
+                        IUH.add(s); 
                     } catch (InterruptedException e) {
                         future.cancel(true); 
                     } catch (ExecutionException e) {

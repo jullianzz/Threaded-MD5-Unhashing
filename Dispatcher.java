@@ -7,7 +7,9 @@ import java.util.ArrayList;
 
 public class Dispatcher {
 
-    static void dispatch(String path, int N, long timeout) {
+    static ArrayList<CpuThread> threads;
+
+    static void dispatch(String path, int N, long timeout, HashCallable cb) {
         // Declare Global wq
         LinkedList<String> wq = new LinkedList<String>();
 
@@ -30,9 +32,9 @@ public class Dispatcher {
 
 
         // Create the N threads and start run() for each so it remains idle
-        ArrayList<CpuThread> threads = new ArrayList<CpuThread>(N); 
+        threads = new ArrayList<CpuThread>(N); 
         for (int i = 0; i < N; i++) {
-            threads.add(new CpuThread(i, timeout));
+            threads.add(new CpuThread(i, timeout, cb));
             // Start thread so it remains idle
             threads.get(i).start(); 
         }
@@ -45,7 +47,6 @@ public class Dispatcher {
                     try {
                         // Add work to thread buffer
                         threads.get(i).addToBuffer(wq.remove()); 
-                        // System.out.println("kill me1");
                     } catch (NoSuchElementException e) {
                         // NoSuchElementException
                     }
@@ -72,17 +73,17 @@ public class Dispatcher {
 
     }
 
-    public static void main(String[] args) {
-        String path = args[0];      // Path of input file
-        int N = Integer.parseInt(args[1]); // Number of CPUs on the machine, N
+    // public static void main(String[] args) {
+    //     String path = args[0];      // Path of input file
+    //     int N = Integer.parseInt(args[1]); // Number of CPUs on the machine, N
 
-        try {
-            long timeout = Long.parseLong(args[2]);
-            Dispatcher.dispatch(path, N, timeout); 
-        } catch (ArrayIndexOutOfBoundsException e) {
-            Dispatcher.dispatch(path, N, -1); 
-        }
+    //     try {
+    //         long timeout = Long.parseLong(args[2]);
+    //         Dispatcher.dispatch(path, N, timeout); 
+    //     } catch (ArrayIndexOutOfBoundsException e) {
+    //         Dispatcher.dispatch(path, N, -1); 
+    //     }
 
-    }
+    // }
     
 }

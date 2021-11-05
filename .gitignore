@@ -1,3 +1,4 @@
 *.class
 *.zip
 *.txt
+!initially_uncrackable.txt
