@@ -10,15 +10,17 @@ public class Pirate {
 
     static void findTreasure(String path, int N, long timeout) {
 
+        System.out.println("First run:");
         // First UnHashing run
         HashCallable hc = new HashCallable(); 
         Dispatcher.dispatch(path, N, timeout, hc); 
 
-        while (!Dispatcher.done) {
-            if (Dispatcher.done) {
-                break;
-            }
-        }
+        // while (!Dispatcher.done) {
+        //     if (Dispatcher.done) {
+        //         System.out.println("dispatcher done");
+        //         break;
+        //     }
+        // }
 
         // Iterate through CpuThreads in Dispatcher.threads and create ch and iuh data structures 
         HashSet<Integer> ch = new HashSet<Integer>();
@@ -28,12 +30,12 @@ public class Pirate {
             iuh.addAll(thr.iuh);    // Compile list of master array of initially uncracked hashes
         }
 
-        System.out.println("iuh size: " + iuh.size());
+        // System.out.println("iuh size: " + iuh.size());
 
-        // System.out.print("Shitshow at the Fuck Factory");
+        System.out.println("\nSecond run:");
 
         // Sort ch into ch_list
-        List<Integer> ch_list = new ArrayList<Integer>(ch);
+        ArrayList<Integer> ch_list = new ArrayList<Integer>(ch);
         Collections.sort(ch_list);
         // for (String s : iuh) {
         //     System.out.println("Yas"  + s);
@@ -42,11 +44,11 @@ public class Pirate {
 
         // Create new path input file for second UnHashing run
         try {
-            FileWriter fw = new FileWriter("intially_uncrackable.txt", true);
+            FileWriter fw = new FileWriter("intially_uncrackable.txt");
             while (iuh.size() != 0) {
                 String s = iuh.remove(); 
-                System.out.println("Yas"  + s);
-                fw.write(s +  "\\n");
+                // System.out.println("Yas"  + s);
+                fw.write(s + "\\n" + "\n");
             }
             fw.close();
 
@@ -54,9 +56,9 @@ public class Pirate {
             // IOException
         }
 
-        // CompoundHintCallable chc = new CompoundHintCallable(); 
+        CompoundHintCallable chc = new CompoundHintCallable(ch_list); 
  
-        // Dispatcher.dispatch("intially_uncrackable.txt", N, timeout, chc); 
+        Dispatcher.dispatch("intially_uncrackable.txt", N, timeout, chc); 
         
     }
 

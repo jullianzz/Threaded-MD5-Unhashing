@@ -21,8 +21,10 @@ public class UnHash {
 
     // this method only holds if the timeout is shared across the set of hints
     int unhashWithCompoundHint(String to_unhash, int alpha, int beta) { 
+        // System.out.println("String to unhash: " + to_unhash + " poopity");
         int i = alpha; 
         while (i <= beta) {
+            // System.out.println(i);
             if (stop_task) {
                 break; 
             }

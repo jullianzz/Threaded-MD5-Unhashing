@@ -76,7 +76,9 @@ public class Dispatcher {
                         }
                     }
                     if (dispatcher_complete) {
-                        System.out.println("complete");
+                        done = true;
+                        // System.out.println("complete");
+                        return;
                     }
                 }                
             }

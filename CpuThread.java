@@ -52,7 +52,7 @@ public class CpuThread implements Runnable {
                         busy = false; 
                     } catch (TimeoutException e) {
                         callable.uh.stop_task = true; 
-                        System.out.println("Adding " + s);
+                        // System.out.println("Adding " + s);
                         iuh.add(s); 
                     } catch (InterruptedException e) {
                         // InterruptedException

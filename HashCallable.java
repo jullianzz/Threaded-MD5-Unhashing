@@ -7,7 +7,7 @@ public class HashCallable implements Callable<Integer> {
 
     public HashCallable() {
         uh = new UnHash(); 
-        System.out.println("new callable  created");
+        // System.out.println("new hash callable created");
     }
 
     @Override
@@ -26,7 +26,8 @@ public class HashCallable implements Callable<Integer> {
             System.out.println(val);
         } else {
             // System.out.println(s + " is unhashable");
-            System.out.println(s);
+            // System.out.println(s);
+            // Don't print if hash unsuccessful
         }
     }
 
