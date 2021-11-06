@@ -9,6 +9,8 @@ public class Dispatcher {
 
     static ArrayList<CpuThread> threads;
 
+    static boolean done = false; 
+
     static void dispatch(String path, int N, long timeout, HashCallable cb) {
         // Declare Global wq
         LinkedList<String> wq = new LinkedList<String>();
@@ -34,7 +36,7 @@ public class Dispatcher {
         // Create the N threads and start run() for each so it remains idle
         threads = new ArrayList<CpuThread>(N); 
         for (int i = 0; i < N; i++) {
-            threads.add(new CpuThread(i, timeout, cb));
+            threads.add(new CpuThread(i, timeout, cb.createNew()));
             // Start thread so it remains idle
             threads.get(i).start(); 
         }
@@ -56,34 +58,30 @@ public class Dispatcher {
 
         // Shutdown all threads once wq is empty
         while (true) {
-            boolean allDown = true; 
+            boolean all_shutdown = true; 
             if (wq.size() == 0) {
                 for (int i = 0; i < N; i++) {
                     if (!threads.get(i).busy && threads.get(i).buffer.size() == 0) {
                         threads.get(i).shutdown = true; 
                     } else {
-                        allDown = false;
+                        all_shutdown = false;
                     }
                 }
-                if (allDown) {
-                    return; 
-                }
+                if (all_shutdown) {
+                    boolean dispatcher_complete = true;
+                    for (int i = 0; i < N; i++) {
+                        if (!threads.get(i).executor.isShutdown()) {
+                            dispatcher_complete = false; 
+                            break;
+                        }
+                    }
+                    if (dispatcher_complete) {
+                        System.out.println("complete");
+                    }
+                }                
             }
         }
 
     }
-
-    // public static void main(String[] args) {
-    //     String path = args[0];      // Path of input file
-    //     int N = Integer.parseInt(args[1]); // Number of CPUs on the machine, N
-
-    //     try {
-    //         long timeout = Long.parseLong(args[2]);
-    //         Dispatcher.dispatch(path, N, timeout); 
-    //     } catch (ArrayIndexOutOfBoundsException e) {
-    //         Dispatcher.dispatch(path, N, -1); 
-    //     }
-
-    // }
     
 }

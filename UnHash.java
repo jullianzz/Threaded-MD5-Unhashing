@@ -1,15 +1,18 @@
 
 public class UnHash {
 
-    boolean stop_task = false; 
+    boolean stop_task;
 
     int unhash (String to_unhash) {
+        // System.out.println("String to unhash: " + to_unhash);
         int i = 0; 
         while (true) {
             if (stop_task) {
+                // System.out.println("String to unhash: " + to_unhash);
                 return -1; 
             }
             if (to_unhash.equals(Hash.hash(i))) {
+                // System.out.println("String to unhash: " + to_unhash);
                 return i; 
             } 
             i++;

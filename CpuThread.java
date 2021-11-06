@@ -1,12 +1,12 @@
 import java.util.NoSuchElementException;
 import java.lang.Runnable;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 
@@ -18,8 +18,8 @@ public class CpuThread implements Runnable {
     Future<Integer> future;
     volatile boolean shutdown; 
     LinkedList<String> buffer = new LinkedList<String>();
-    LinkedList<Integer> CH = new LinkedList<Integer>();     // CH : cracked hashes
-    LinkedList<String> IUH = new LinkedList<String>();      // IUH : initially uncrackable hashes
+    HashSet<Integer> ch = new HashSet<Integer>();     // ch : cracked hashes
+    LinkedList<String> iuh = new LinkedList<String>();      // iuh : initially uncrackable hashes
     HashCallable callable; 
 
     public CpuThread(int i, long timeout, HashCallable cb) {
@@ -36,6 +36,7 @@ public class CpuThread implements Runnable {
     public void run() {
 
         while (!shutdown) {
+            System.out.print("");
             try {
                 if (buffer.size() != 0) {
                     String s = buffer.remove(); 
@@ -44,21 +45,28 @@ public class CpuThread implements Runnable {
                     try {
                         future = executor.submit(callable);
                         int result; 
-                        if (timeout != -1)
-                            result = future.get(timeout, TimeUnit.MILLISECONDS); 
-                        else
-                            result = future.get(); 
+                        result = future.get(timeout, TimeUnit.MILLISECONDS);
+                        // System.out.println("It does return!");
                         if (result != -1) 
-                            CH.add(result);
+                            ch.add(result);
+                        busy = false; 
                     } catch (TimeoutException e) {
                         callable.uh.stop_task = true; 
-                        future.cancel(true);
-                        IUH.add(s); 
+                        System.out.println("Adding " + s);
+                        iuh.add(s); 
                     } catch (InterruptedException e) {
-                        future.cancel(true); 
+                        // InterruptedException
                     } catch (ExecutionException e) {
-                        future.cancel(true); 
+                        // ExecutionException
                     } finally {
+                        try {
+                            future.get(); // put here for blocking purposes, need to get the return time from this thread
+                        } catch (InterruptedException e) {
+                            // InterruptedException
+                        } catch (ExecutionException e) {
+                            // ExecutionException
+                        }
+                        future.cancel(true);
                         busy = false; 
                     }
                 }
@@ -77,4 +85,5 @@ public class CpuThread implements Runnable {
     void addToBuffer(String s) {
         buffer.add(s); 
     }
+
 }
