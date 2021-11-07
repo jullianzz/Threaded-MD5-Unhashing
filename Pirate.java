@@ -4,23 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 
 public class Pirate {
 
     static void findTreasure(String path, int N, long timeout) {
 
-        System.out.println("First run:");
         // First UnHashing run
+        System.out.println("First run:");
         HashCallable hc = new HashCallable(); 
         Dispatcher.dispatch(path, N, timeout, hc); 
-
-        // while (!Dispatcher.done) {
-        //     if (Dispatcher.done) {
-        //         System.out.println("dispatcher done");
-        //         break;
-        //     }
-        // }
 
         // Iterate through CpuThreads in Dispatcher.threads and create ch and iuh data structures 
         HashSet<Integer> ch = new HashSet<Integer>();
@@ -37,6 +29,9 @@ public class Pirate {
         // Sort ch into ch_list
         ArrayList<Integer> ch_list = new ArrayList<Integer>(ch);
         Collections.sort(ch_list);
+        // for (int i : ch_list) {
+        //     System.out.println("Yas: " + i);
+        // }
         // for (String s : iuh) {
         //     System.out.println("Yas"  + s);
         // }
@@ -48,7 +43,7 @@ public class Pirate {
             while (iuh.size() != 0) {
                 String s = iuh.remove(); 
                 // System.out.println("Yas"  + s);
-                fw.write(s + "\\n" + "\n");
+                fw.write(s + "\n");
             }
             fw.close();
 

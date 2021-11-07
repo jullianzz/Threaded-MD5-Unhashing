@@ -16,26 +16,36 @@ public class CompoundHintCallable extends HashCallable {
         int k = -1; 
         int alpha = ch.get(0); 
         int beta = ch.get(1); 
+        // int i = 0; 
         for (int i = 0 ; i < ch.size()-1; i++) {
-            alpha = ch.get(i)+1;
-            beta = ch.get(i+1)-1; 
-            System.out.println("alpha: " + alpha);
-            System.out.println("beta: " + beta);
-            k = uh.unhashWithCompoundHint(s, alpha, beta);
-            if (k != -1) {    // Hash successful
-                ch.remove(i);
-                ch.remove(i+1);
-                break; 
+            alpha = ch.get(i);
+            for (int j = 1; j < ch.size(); j++) {
+                beta = ch.get(j); 
+                k = uh.unhashWithCompoundHint(s, alpha, beta);
+                if (k != -1) {    // Hash successful
+                    // System.out.println("succ!");
+                    print(k, alpha, beta); 
+                    // ch.remove(i);
+                    // ch.remove(i+1);
+                    return k; // if k not -1, unhashing is successful
+                }
             }
+            // if (s.equals("600a65004f52ffa44302865e32980e30")) {
+            //     System.out.println("alpha: " + alpha);
+            //     System.out.println("beta: " + beta);
+            // }
         }
+        // System.out.println("here!");
         print(k, alpha, beta); 
-        return k; // if k not -1, unhashing is successful
+        return -1; // if k not -1, unhashing is successful
     }
 
     void print(int k, int alpha, int beta) {
+        // System.out.println("Printing!");
         if (k != -1) {
             System.out.println(alpha + ";" + k + ";" + beta);
         } else {
+            // System.out.println("come here!");
             System.out.println(s);
         }
     }

@@ -20,10 +20,11 @@ public class Dispatcher {
         try {
             reader = new BufferedReader(new FileReader(path));
             String line = reader.readLine();
-            String to_unhash; 
+            // String to_unhash; 
             while (line != null) {
-                to_unhash = line.replace("\\n","");
-                wq.add(to_unhash);
+                // to_unhash = line.replace("\\n","");
+                // wq.add(to_unhash);
+                wq.add(line);
                 line = reader.readLine(); 
             }
             reader.close(); 
