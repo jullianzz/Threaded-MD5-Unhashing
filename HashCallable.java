@@ -4,35 +4,30 @@ public class HashCallable implements Callable<Integer> {
 
     String s; 
     UnHash uh;
+    final int SEMAPHORE_COUNT;  // The number of semaphores allowed to hold the critical section defined in call()
 
-    public HashCallable() {
+    public HashCallable(int count) {
         uh = new UnHash(); 
-        // System.out.println("new hash callable created");
+        SEMAPHORE_COUNT = count;
     }
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() throws Exception {    // Critical Section
         uh.stop_task = false; 
-        // System.out.println(" unhashing: " + s);
         int val = uh.unhash(s);
-        // System.out.println(" unhashed: " + s);
         print(val);
-        return val; // if val not -1, unhashing is successful
+        return val;     // If val not -1, unhashing is successful
     }
 
     void print(int val) {
-        if (val != -1) {
-            // System.out.println(s + " unhashed is " + val);
+        if (val != -1) {    // Print if hash is successful
             System.out.println(val);
-        } else {
-            // System.out.println(s + " is unhashable");
-            // System.out.println(s);
-            // Don't print if hash unsuccessful
-        }
+        } 
+        // Don't print if hash unsuccessful
     }
 
     HashCallable createNew() {
-        return new HashCallable();
+        return new HashCallable(SEMAPHORE_COUNT);
     }
-    
+
 }

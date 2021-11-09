@@ -9,8 +9,6 @@ public class Dispatcher {
 
     static ArrayList<CpuThread> threads;
 
-    static boolean done = false; 
-
     static void dispatch(String path, int N, long timeout, HashCallable cb) {
         // Declare Global wq
         LinkedList<String> wq = new LinkedList<String>();
@@ -20,10 +18,7 @@ public class Dispatcher {
         try {
             reader = new BufferedReader(new FileReader(path));
             String line = reader.readLine();
-            // String to_unhash; 
             while (line != null) {
-                // to_unhash = line.replace("\\n","");
-                // wq.add(to_unhash);
                 wq.add(line);
                 line = reader.readLine(); 
             }
@@ -41,6 +36,11 @@ public class Dispatcher {
             // Start thread so it remains idle
             threads.get(i).start(); 
         }
+
+        // Set Critical Section Stuff
+        CpuThread.turn_id = 0;
+        CpuThread.numThrRunningCS = 0;
+        CpuThread.semaphore_queue = new LinkedList<Integer>();
 
         // Distribute work to threads until there is no work left
         while (wq.size() != 0) {
@@ -77,8 +77,6 @@ public class Dispatcher {
                         }
                     }
                     if (dispatcher_complete) {
-                        done = true;
-                        // System.out.println("complete");
                         return;
                     }
                 }                

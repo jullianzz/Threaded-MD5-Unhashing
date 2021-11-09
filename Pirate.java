@@ -1,6 +1,5 @@
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,8 +9,7 @@ public class Pirate {
     static void findTreasure(String path, int N, long timeout) {
 
         // First UnHashing run
-        System.out.println("First run:");
-        HashCallable hc = new HashCallable(); 
+        HashCallable hc = new HashCallable(N);      // SEMAPHORE_COUNT = N
         Dispatcher.dispatch(path, N, timeout, hc); 
 
         // Iterate through CpuThreads in Dispatcher.threads and create ch and iuh data structures 
@@ -22,19 +20,11 @@ public class Pirate {
             iuh.addAll(thr.iuh);    // Compile list of master array of initially uncracked hashes
         }
 
-        // System.out.println("iuh size: " + iuh.size());
-
         System.out.println("\nSecond run:");
 
         // Sort ch into ch_list
-        ArrayList<Integer> ch_list = new ArrayList<Integer>(ch);
+        LinkedList<Integer> ch_list = new LinkedList<Integer>(ch);
         Collections.sort(ch_list);
-        // for (int i : ch_list) {
-        //     System.out.println("Yas: " + i);
-        // }
-        // for (String s : iuh) {
-        //     System.out.println("Yas"  + s);
-        // }
 
 
         // Create new path input file for second UnHashing run
@@ -42,7 +32,6 @@ public class Pirate {
             FileWriter fw = new FileWriter("intially_uncrackable.txt");
             while (iuh.size() != 0) {
                 String s = iuh.remove(); 
-                // System.out.println("Yas"  + s);
                 fw.write(s + "\n");
             }
             fw.close();
@@ -51,7 +40,8 @@ public class Pirate {
             // IOException
         }
 
-        CompoundHintCallable chc = new CompoundHintCallable(ch_list); 
+        CompoundHintCallable chc = new CompoundHintCallable(1);    // SEMAPHORE_COUNT = 1
+        CompoundHintCallable.ch = ch_list; 
  
         Dispatcher.dispatch("intially_uncrackable.txt", N, timeout, chc); 
         
