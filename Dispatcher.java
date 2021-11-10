@@ -29,18 +29,20 @@ public class Dispatcher {
         }
 
 
+        // Set Critical Section Stuff
+        CpuThread.turn_id = 0;
+        CpuThread.numThrRunningCS = 0;
+        // CpuThread.semaphore_queue = new LinkedList<Integer>();
+        CpuThread.flags = new ArrayList<Boolean>(N); 
+
         // Create the N threads and start run() for each so it remains idle
         threads = new ArrayList<CpuThread>(N); 
         for (int i = 0; i < N; i++) {
             threads.add(new CpuThread(i, timeout, cb.createNew()));
+            CpuThread.flags.add(false);
             // Start thread so it remains idle
             threads.get(i).start(); 
         }
-
-        // Set Critical Section Stuff
-        CpuThread.turn_id = 0;
-        CpuThread.numThrRunningCS = 0;
-        CpuThread.semaphore_queue = new LinkedList<Integer>();
 
         // Distribute work to threads until there is no work left
         while (wq.size() != 0) {

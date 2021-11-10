@@ -21,19 +21,16 @@ public class CompoundHintCallable extends HashCallable {
                 beta = ch.get(j); 
                 k = uh.unhashWithCompoundHint(s, alpha, beta);
                 if (k != -1) {    // Hash successful
-                    print(k, alpha, beta); 
-                    System.out.println("ch old: " + ch);
-                    System.out.println("Removed " + alpha);
-                    System.out.println("Removed " + beta);
                     // Remove beta before alpha so indices are conserved. Assumption: index of alpha always < index of beta.
                     ch.remove(j);   // Remove beta 
                     ch.remove(i);   // Remove alpha
-                    System.out.println("ch new: " + ch);
+                    print(k, alpha, beta); 
                     return k; // if k not -1, unhashing is successful
                 }
             }
         }
-        print(k, alpha, beta); 
+        
+        print(k, alpha, beta);
         return -1; // if k not -1, unhashing is successful
     }
 

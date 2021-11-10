@@ -20,7 +20,7 @@ public class Pirate {
             iuh.addAll(thr.iuh);    // Compile list of master array of initially uncracked hashes
         }
 
-        System.out.println("\nSecond run:");
+        // System.out.println("\nSecond run:");
 
         // Sort ch into ch_list
         LinkedList<Integer> ch_list = new LinkedList<Integer>(ch);

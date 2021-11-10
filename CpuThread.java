@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.ArrayList;
 
 
 public class CpuThread implements Runnable {
@@ -21,9 +22,11 @@ public class CpuThread implements Runnable {
     HashSet<Integer> ch = new HashSet<Integer>();           // ch : cracked hashes
     LinkedList<String> iuh = new LinkedList<String>();      // iuh : initially uncrackable hashes
     HashCallable callable; 
+    static boolean isExecRelease = false; 
 
     // Critical Section stuff
-    static LinkedList<Integer> semaphore_queue;     // Queue that holds the thread ids that are waiting for the semaphore
+    // static LinkedList<Integer> semaphore_queue;     // Queue that holds the thread ids that are waiting for the semaphore
+    static ArrayList<Boolean> flags;
     static int turn_id;             // id of the thread that gets to run the critical section
     final int thr_id;                // id of this thread
     static int numThrRunningCS;     // keeps track of number of threads holding a semaphore
@@ -61,7 +64,6 @@ public class CpuThread implements Runnable {
                     } catch (TimeoutException e) {
                         callable.uh.stop_task = true; 
                         release();          // Release the semaphore/critical section and set next thread to use semaphore
-                        // System.out.println("Timed out");
                         iuh.add(s); 
                     } catch (InterruptedException e) {
                         // InterruptedException
@@ -75,13 +77,6 @@ public class CpuThread implements Runnable {
                         } catch (Exception e) {
                             // Exception
                         }
-                        // } catch (InterruptedException e) {
-                        //     // InterruptedException
-                        // } catch (ExecutionException e) {
-                        //     // ExecutionException
-                        // } catch (NullPointerException e) {
-                        //     // NullPointerException
-                        // }
                         busy = false; 
                     }
                 }
@@ -101,19 +96,64 @@ public class CpuThread implements Runnable {
         buffer.add(s); 
     }
 
-    void acquire() {    // Blocking function that acquires semaphore/critical section
-        if (CpuThread.numThrRunningCS >= callable.SEMAPHORE_COUNT) {    
-            semaphore_queue.add(thr_id);    // Add thread id to the queue of threads waiting for semaphore
-            while (turn_id != thr_id);      // Block until turn_id = thr_id
-        } 
-        // If the the number of holding threads is fewer than available semaphores, just execute critical path w/o waiting
-        numThrRunningCS ++;
+    void acquire() {    // Acquires semaphore/critical section
+        flags.set(thr_id, true);
+        if (callable.SEMAPHORE_COUNT != 1) {
+        // if (CpuThread.numThrRunningCS < callable.SEMAPHORE_COUNT) { // should only pass with HashCallable
+            CpuThread.numThrRunningCS ++;
+            return;
+        } else {
+            while (turn_id != thr_id) {
+                System.out.print("");
+            }
+            CpuThread.numThrRunningCS ++;
+            return;
+        }
+    }
+
+    void release() {    // Releases semaphore/critical section
+        CpuThread.numThrRunningCS --;  
+        flags.set(thr_id, false);
+        for (int i = 1; i < flags.size(); i++) {
+            int new_id = (thr_id+i) % flags.size(); // round robin
+            if (flags.get(new_id) == true) {  // flag is raised
+                turn_id = new_id;
+            }
+        }
+        // System.out.println("Flag array: " + flags);
+        System.out.println("");
         return;
     }
 
-    void release() {    // Release semaphore/critical section
-        numThrRunningCS --;
-        // turn_id = semaphore_queue.remove();
-    }
-
 }
+
+
+// void acquire() {    // Acquires semaphore/critical section
+//     if (CpuThread.numThrRunningCS < callable.SEMAPHORE_COUNT) {
+//         CpuThread.numThrRunningCS ++;
+//         return;
+//     } else {
+//         semaphore_queue.add(thr_id);    // Add thread id to the queue of threads waiting for semaphore
+//         while (true) {
+//             while (CpuThread.numThrRunningCS == callable.SEMAPHORE_COUNT) {
+//                 System.out.print("");
+//             }
+//             if (semaphore_queue.size() != 0) {
+//                 System.out.print("");
+//                 if (semaphore_queue.peek() == thr_id) {
+//                     turn_id = semaphore_queue.remove(); 
+//                     CpuThread.numThrRunningCS ++;
+//                     return;
+//                 }
+//             }
+//         }
+//     }
+// }
+
+// void release() {    // Releases semaphore/critical section
+//     CpuThread.numThrRunningCS --;  
+//     if (semaphore_queue.size() != 0) {
+//         System.out.println("Waiting queue: " + semaphore_queue);
+//     }
+//     return;
+// }
