@@ -3,6 +3,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Semaphore;
 import java.util.ArrayList;
 
 public class Dispatcher {
@@ -30,16 +31,18 @@ public class Dispatcher {
 
 
         // Set Critical Section Stuff
-        CpuThread.turn_id = 0;
-        CpuThread.numThrRunningCS = 0;
-        // CpuThread.semaphore_queue = new LinkedList<Integer>();
-        CpuThread.flags = new ArrayList<Boolean>(N); 
+        Semaphore sem = new Semaphore(cb.SEMAPHORE_COUNT, true);    //SEMAPHORE
+        // CpuThread.turn_id = 0;
+        // CpuThread.numThrRunningCS = 0;
+        // // CpuThread.semaphore_queue = new LinkedList<Integer>();
+        // CpuThread.flags = new ArrayList<Boolean>(N); 
 
+        // System.out.println("Number of semaphores: " + sem.availablePermits());
         // Create the N threads and start run() for each so it remains idle
         threads = new ArrayList<CpuThread>(N); 
         for (int i = 0; i < N; i++) {
-            threads.add(new CpuThread(i, timeout, cb.createNew()));
-            CpuThread.flags.add(false);
+            threads.add(new CpuThread(i, timeout, cb.createNew(), sem));
+            // CpuThread.flags.add(false);
             // Start thread so it remains idle
             threads.get(i).start(); 
         }

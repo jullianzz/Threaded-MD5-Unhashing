@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.Semaphore;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.ArrayList;
@@ -26,20 +27,22 @@ public class CpuThread implements Runnable {
 
     // Critical Section stuff
     // static LinkedList<Integer> semaphore_queue;     // Queue that holds the thread ids that are waiting for the semaphore
-    static ArrayList<Boolean> flags;
-    static int turn_id;             // id of the thread that gets to run the critical section
-    final int thr_id;                // id of this thread
-    static int numThrRunningCS;     // keeps track of number of threads holding a semaphore
+    // static ArrayList<Boolean> flags;
+    // static int turn_id;             // id of the thread that gets to run the critical section
+    // final int thr_id;                // id of this thread
+    // static int numThrRunningCS;     // keeps track of number of threads holding a semaphore
+    Semaphore sem; 
 
 
-    public CpuThread(int i, long timeout, HashCallable cb) {
+    public CpuThread(int i, long timeout, HashCallable cb, Semaphore s) {
         thr = new Thread(this, String.valueOf(i)); 
         this.timeout = timeout; 
         executor = Executors.newSingleThreadExecutor();
         busy = false; 
         shutdown = false; 
         callable = cb; 
-        thr_id = i; 
+        // thr_id = i; 
+        sem = s; 
     }
 
 
@@ -54,16 +57,14 @@ public class CpuThread implements Runnable {
                     callable.s = s; 
                     busy = true; 
                     try {
-                        acquire();          // Acquire semaphore before entering critical section
+                        sem.acquire();          // Acquire semaphore before entering critical section
                         future = executor.submit(callable);
                         int result = future.get(timeout, TimeUnit.MILLISECONDS);
-                        release();          // Release the semaphore/critical section
                         if (result != -1) 
                             ch.add(result);
                         busy = false; 
                     } catch (TimeoutException e) {
                         callable.uh.stop_task = true; 
-                        release();          // Release the semaphore/critical section and set next thread to use semaphore
                         iuh.add(s); 
                     } catch (InterruptedException e) {
                         // InterruptedException
@@ -76,8 +77,10 @@ public class CpuThread implements Runnable {
                             future.cancel(true);
                         } catch (Exception e) {
                             // Exception
+                        } finally {
+                            busy = false; 
+                            sem.release();          // Release the semaphore/critical section and set next thread to use semaphore
                         }
-                        busy = false; 
                     }
                 }
             } catch (NoSuchElementException e) {
@@ -96,34 +99,34 @@ public class CpuThread implements Runnable {
         buffer.add(s); 
     }
 
-    void acquire() {    // Acquires semaphore/critical section
-        flags.set(thr_id, true);
-        if (callable.SEMAPHORE_COUNT != 1) {
-        // if (CpuThread.numThrRunningCS < callable.SEMAPHORE_COUNT) { // should only pass with HashCallable
-            CpuThread.numThrRunningCS ++;
-            return;
-        } else {
-            while (turn_id != thr_id) {
-                System.out.print("");
-            }
-            CpuThread.numThrRunningCS ++;
-            return;
-        }
-    }
+    // void acquire() {    // Acquires semaphore/critical section
+    //     flags.set(thr_id, true);
+    //     if (callable.SEMAPHORE_COUNT != 1) {
+    //     // if (CpuThread.numThrRunningCS < callable.SEMAPHORE_COUNT) { // should only pass with HashCallable
+    //         CpuThread.numThrRunningCS ++;
+    //         return;
+    //     } else {
+    //         while (turn_id != thr_id) {
+    //             System.out.print("");
+    //         }
+    //         CpuThread.numThrRunningCS ++;
+    //         return;
+    //     }
+    // }
 
-    void release() {    // Releases semaphore/critical section
-        CpuThread.numThrRunningCS --;  
-        flags.set(thr_id, false);
-        for (int i = 1; i < flags.size(); i++) {
-            int new_id = (thr_id+i) % flags.size(); // round robin
-            if (flags.get(new_id) == true) {  // flag is raised
-                turn_id = new_id;
-            }
-        }
-        // System.out.println("Flag array: " + flags);
-        System.out.println("");
-        return;
-    }
+    // void release() {    // Releases semaphore/critical section
+    //     CpuThread.numThrRunningCS --;  
+    //     flags.set(thr_id, false);
+    //     for (int i = 1; i < flags.size(); i++) {
+    //         int new_id = (thr_id+i) % flags.size(); // round robin
+    //         if (flags.get(new_id) == true) {  // flag is raised
+    //             turn_id = new_id;
+    //         }
+    //     }
+    //     // System.out.println("Flag array: " + flags);
+    //     System.out.println("");
+    //     return;
+    // }
 
 }
 

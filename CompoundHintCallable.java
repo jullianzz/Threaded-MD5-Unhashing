@@ -1,15 +1,20 @@
 import java.util.LinkedList;
+import java.util.concurrent.Semaphore;
 
 public class CompoundHintCallable extends HashCallable {
 
     static LinkedList<Integer> ch; 
+    // Semaphore sem; 
 
+    // public CompoundHintCallable(int count, Semaphore sem) {
     public CompoundHintCallable(int count) {
         super(count);
     }
     
     @Override
     public Integer call() throws Exception {    // Critical Section
+        // sem.acquire(); 
+
         uh.stop_task = false; 
         int k = -1; 
         int alpha = ch.get(0); 
@@ -25,12 +30,15 @@ public class CompoundHintCallable extends HashCallable {
                     ch.remove(j);   // Remove beta 
                     ch.remove(i);   // Remove alpha
                     print(k, alpha, beta); 
+                    // sem.release();
                     return k; // if k not -1, unhashing is successful
                 }
             }
         }
         
+
         print(k, alpha, beta);
+        // sem.release();
         return -1; // if k not -1, unhashing is successful
     }
 
@@ -43,6 +51,7 @@ public class CompoundHintCallable extends HashCallable {
     }
 
     CompoundHintCallable createNew() {
+        // return new CompoundHintCallable(SEMAPHORE_COUNT, sem);
         return new CompoundHintCallable(SEMAPHORE_COUNT);
     }
 

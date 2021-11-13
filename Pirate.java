@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.concurrent.Semaphore;
+// random change
 
 public class Pirate {
 
@@ -39,7 +41,6 @@ public class Pirate {
         } catch (IOException e) {
             // IOException
         }
-
         CompoundHintCallable chc = new CompoundHintCallable(1);    // SEMAPHORE_COUNT = 1
         CompoundHintCallable.ch = ch_list; 
  
