@@ -3,11 +3,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Semaphore;
 import java.util.ArrayList;
 
 public class Dispatcher {
 
-    static void dispatch(String path, int N, long timeout) {
+    static ArrayList<CpuThread> threads;
+
+    static void dispatch(String path, int N, long timeout, HashCallable cb) {
         // Declare Global wq
         LinkedList<String> wq = new LinkedList<String>();
 
@@ -16,10 +19,8 @@ public class Dispatcher {
         try {
             reader = new BufferedReader(new FileReader(path));
             String line = reader.readLine();
-            String to_unhash; 
             while (line != null) {
-                to_unhash = line.replace("\\n","");
-                wq.add(to_unhash);
+                wq.add(line);
                 line = reader.readLine(); 
             }
             reader.close(); 
@@ -29,10 +30,19 @@ public class Dispatcher {
         }
 
 
+        // Set Critical Section Stuff
+        Semaphore sem = new Semaphore(cb.SEMAPHORE_COUNT, true);    //SEMAPHORE
+        // CpuThread.turn_id = 0;
+        // CpuThread.numThrRunningCS = 0;
+        // // CpuThread.semaphore_queue = new LinkedList<Integer>();
+        // CpuThread.flags = new ArrayList<Boolean>(N); 
+
+        // System.out.println("Number of semaphores: " + sem.availablePermits());
         // Create the N threads and start run() for each so it remains idle
-        ArrayList<CpuThread> threads = new ArrayList<CpuThread>(N); 
+        threads = new ArrayList<CpuThread>(N); 
         for (int i = 0; i < N; i++) {
-            threads.add(new CpuThread(i, timeout));
+            threads.add(new CpuThread(i, timeout, cb.createNew(), sem));
+            // CpuThread.flags.add(false);
             // Start thread so it remains idle
             threads.get(i).start(); 
         }
@@ -45,7 +55,6 @@ public class Dispatcher {
                     try {
                         // Add work to thread buffer
                         threads.get(i).addToBuffer(wq.remove()); 
-                        // System.out.println("kill me1");
                     } catch (NoSuchElementException e) {
                         // NoSuchElementException
                     }
@@ -55,32 +64,28 @@ public class Dispatcher {
 
         // Shutdown all threads once wq is empty
         while (true) {
-            boolean allDown = true; 
+            boolean all_shutdown = true; 
             if (wq.size() == 0) {
                 for (int i = 0; i < N; i++) {
                     if (!threads.get(i).busy && threads.get(i).buffer.size() == 0) {
                         threads.get(i).shutdown = true; 
                     } else {
-                        allDown = false;
+                        all_shutdown = false;
                     }
                 }
-                if (allDown) {
-                    return; 
-                }
+                if (all_shutdown) {
+                    boolean dispatcher_complete = true;
+                    for (int i = 0; i < N; i++) {
+                        if (!threads.get(i).executor.isShutdown()) {
+                            dispatcher_complete = false; 
+                            break;
+                        }
+                    }
+                    if (dispatcher_complete) {
+                        return;
+                    }
+                }                
             }
-        }
-
-    }
-
-    public static void main(String[] args) {
-        String path = args[0];      // Path of input file
-        int N = Integer.parseInt(args[1]); // Number of CPUs on the machine, N
-
-        try {
-            long timeout = Long.parseLong(args[2]);
-            Dispatcher.dispatch(path, N, timeout); 
-        } catch (ArrayIndexOutOfBoundsException e) {
-            Dispatcher.dispatch(path, N, -1); 
         }
 
     }
