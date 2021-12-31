@@ -17,8 +17,8 @@ The solution to this problem touches upon concepts of concurrency and synchroniz
 
 * ##### Sample Runs Using ```test_inputs``` folder
 * *Note: Both input files (2) and their corresponding solutions (2) are located in the ```test_inputs``` folder. The solution does not follow a strict-ordering. Try re-running and adjusting the timeout if the process hangs.*
-java Pirate test_inputs/dathashlist_test.txt 4 2000
-java Pirate test_inputs/dathashlist_test2.txt 4 3000
+* Ex. 1: java Pirate test_inputs/dathashlist_test.txt 4 2000
+* Ex. 2: java Pirate test_inputs/dathashlist_test2.txt 4 3000
 
 ### Please Read
 ***ALL code written in this repository is under the authorship of Julia Zeng (@jullianzz), who belongs to the Electrical & Computer Engineering Department at Boston University. All code is written strictly for educational purposes and not authorized for redistribution or re-purposing in any domain or by any individual or enterprise.***
