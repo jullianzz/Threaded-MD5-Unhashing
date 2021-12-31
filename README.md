@@ -16,7 +16,7 @@ The solution to this problem touches upon concepts of concurrency and synchroniz
 3. param2: timeout in milliseconds, i.e. the length of time a thread spends uncracking the hash
 
 * ##### Sample Runs Using ```test_inputs``` folder
-* *Note: Both (2) input files and their corresponding (2) solutions are located in the ```test_inputs``` folder. The solution does not follow a strict-ordering. Try re-running and adjusting the timeout if the process hangs.*
+* *Note: Both input files (2) and their corresponding solutions (2) are located in the ```test_inputs``` folder. The solution does not follow a strict-ordering. Try re-running and adjusting the timeout if the process hangs.*
 java Pirate test_inputs/dathashlist_test.txt 4 2000
 java Pirate test_inputs/dathashlist_test2.txt 4 3000
 
