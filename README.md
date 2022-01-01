@@ -9,7 +9,7 @@ The solution to this problem touches upon concepts of concurrency and synchroniz
 ### Download and Run 
 * Download the version in the main branch
 * Navigate to local directory containing the files and compile all .java files
-* Run Simulator main using ```java Pirate <param0> <param1> <param2>```
+* Run Pirate main using ```java Pirate <param0> <param1> <param2>```
 
 1. param0: path to input file containing hashes 
 2. param1: number of processors, i.e., worker threads to parallelize the work
